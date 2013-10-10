@@ -1,7 +1,11 @@
 body {
-padding: 30px;
+  padding: 30px;
 }
 
 .navbar {
-margin-bottom: 30px;
+  margin-bottom: 30px;
+}
+
+#mapcon {
+  margin: 0px auto;
 }
