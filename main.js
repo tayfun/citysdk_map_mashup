@@ -16,7 +16,8 @@ ymaps.ready(function() {
     $(".loading").remove();
     var myMap = new ymaps.Map('mapcon', {
       center: [lat, lng],
-      zoom: 15
+      zoom: 15,
+      behaviors: ["drag", "dblClickZoom", "multiTouch"]
     });
   }
 });
