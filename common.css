@@ -1,11 +1,8 @@
-body {
-  padding: 30px;
-}
-
-.navbar {
-  margin-bottom: 30px;
+html, body {
+    height: 100%;
+    margin: 0;
 }
 
 #mapcon {
-  margin: 0px auto;
+    min-height: 100%;
 }
