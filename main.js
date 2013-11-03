@@ -2,18 +2,22 @@
 var topluTasima = {
     "baseUrl": "http://apicitysdk.ibb.gov.tr/",
     "stops": {},
-    "lines": {}
+    "lines": {},
+    "locationToMarker": {},
+    "map": null
 };
 
 function initialize() {
-    $(".loading").show();
-    google.maps.visualRefresh = true;
+    "use strict";
+
     var mapcon = document.getElementById("mapcon");
     var tStops = topluTasima.stops;
     var tLines;
+    $(".loading").show();
+    google.maps.visualRefresh = true;
     topluTasima.$mapcon = $(mapcon);
 
-    topluTasima.mapOptions = mapOptions = {
+    var mapOptions = topluTasima.mapOptions = {
         // center is added later through geolocation.
         // 16 is the smallest zoom that shows bus stops.
         zoom: 16,
@@ -47,24 +51,25 @@ function initialize() {
 
     function getNearbyStops() {
         // Gets nearby stops from citysdk api.
-        curPos = topluTasima.map.getCenter();
-        stopParameters = {
+        var curPos = topluTasima.map.getCenter();
+        var stopParameters = {
             "radius": 400,  // Get data around 400m radius
             "lat": curPos.lat(),
             "lon": curPos.lng(),
             "geom": true,  // Get lat long values of POI as well.
         };
         (function getPage(page) {
-            params = $.param(stopParameters);
+            var params = $.param(stopParameters);
             params += "&page=" + page;
             $.get(topluTasima.baseUrl + "ptstops", params, function(data) {
                 console.log(data);
                 for (var i = 0; i < data.results.length; i++) {
                     var stop = data.results[i];
+                    // IETT uses long,lat format so reverse it to become
+                    // compatible with maps.
+                    var location = new google.maps.LatLng(stop.geom.coordinates[1], stop.geom.coordinates[0]);
                     tStops[stop.cdk_id] = {
-                        // IETT uses long,lat format so reverse it to become
-                        // compatible with maps.
-                        "location": stop.geom.coordinates.reverse(),
+                        "location": location,
                         "name": stop.name,
                         "lines": {}
                     };
@@ -106,7 +111,7 @@ function initialize() {
     }
 
     function getSchedule(line) {
-        $.get(topluTasima.baseUrl + line + "/select/schedule", function(data) {
+        return $.get(topluTasima.baseUrl + line + "/select/schedule", function(data) {
             var trips = data.results[0].trips;
             for (var i = 0; i < trips.length; i++) {
                 var route = trips[i];
@@ -123,17 +128,52 @@ function initialize() {
         });
     }
 
+    function showInfoWindow(event) {
+        // Receives click from marker and shows an info window.
+        var marker = topluTasima.locationToMarker[event.latLng];
+        if (topluTasima.infoWindow) {
+            // Remove previous window if there's one.
+            topluTasima.infoWindow.close();
+            delete topluTasima.infoWindow;
+        }
+        topluTasima.infoWindow = new google.maps.InfoWindow({
+            content: tStops[marker.stopCid].name
+        });
+        topluTasima.infoWindow.open(topluTasima.map, marker);
+    }
+
+    function renderMap() {
+        for (var stopCid in tStops) {
+            var stop = tStops[stopCid];
+            var marker = topluTasima.locationToMarker[stop.location] = new google.maps.Marker({
+                position: stop.location,
+                map: topluTasima.map,
+                title: stop.name,
+                icon: "/images/bus2.png",
+                infoWindow: infoWindow,
+                stopCid: stopCid
+            });
+            var infoWindow = new google.maps.InfoWindow({
+                content: stop.name
+            });
+            google.maps.event.addListener(marker, "click", showInfoWindow);
+        }
+    }
+
     function getLines() {
         var requests = [];
-        for (var stop in topluTasima.stops) {
+        for (var stop in tStops) {
             requests.push(getLinesThrough(stop, 0));
         }
         // After all lines are retrieved, get schedules.
         var defer = $.when.apply($, requests);
         defer.done(function(){
+            var requests = [];
             for (var line in topluTasima.lines) {
-                getSchedule(line);
+                requests.push(getSchedule(line));
             }
+            var defer = $.when.apply($, requests);
+            defer.done(renderMap());
         });
     }
 
