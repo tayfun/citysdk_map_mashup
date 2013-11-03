@@ -4,7 +4,8 @@ var topluTasima = {
     "stops": {},
     "lines": {},
     "locationToMarker": {},
-    "map": null
+    "map": null,
+    "template": _.template($("#stop-template").html())
 };
 
 function initialize() {
@@ -136,8 +137,9 @@ function initialize() {
             topluTasima.infoWindow.close();
             delete topluTasima.infoWindow;
         }
+        var content = topluTasima.template({"stop": marker.stop});
         topluTasima.infoWindow = new google.maps.InfoWindow({
-            content: tStops[marker.stopCid].name
+            content: content
         });
         topluTasima.infoWindow.open(topluTasima.map, marker);
     }
@@ -151,7 +153,7 @@ function initialize() {
                 title: stop.name,
                 icon: "/images/bus2.png",
                 infoWindow: infoWindow,
-                stopCid: stopCid
+                stop: stop
             });
             var infoWindow = new google.maps.InfoWindow({
                 content: stop.name
