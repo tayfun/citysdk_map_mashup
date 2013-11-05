@@ -37,7 +37,6 @@ function initialize() {
     }
 
     function geoSuccess(position) {
-        console.log("got position from geo api", position.coords);
         mapOptions.center = new google.maps.LatLng(position.coords.latitude,
                 position.coords.longitude);
         initMap();
@@ -45,7 +44,6 @@ function initialize() {
 
     function geoError() {
         // Woot? No geolocation. Use taksim.
-        console.log("got position from ip");
         mapOptions.center = new google.maps.LatLng(41.037413, 28.985017);
         initMap();
     }
@@ -63,7 +61,6 @@ function initialize() {
             var params = $.param(stopParameters);
             params += "&page=" + page;
             $.get(topluTasima.baseUrl + "ptstops", params, function(data) {
-                console.log(data);
                 for (var i = 0; i < data.results.length; i++) {
                     var stop = data.results[i];
                     // IETT uses long,lat format so reverse it to become
@@ -183,8 +180,6 @@ function initialize() {
         $(".loading").remove();
         topluTasima.map = new google.maps.Map(mapcon, mapOptions);
         getNearbyStops();
-        // getSchedules();
-        // drawMap();
     }
 }
 
