@@ -1,11 +1,11 @@
 Özet / Summary
 ==============
 
-Bu projenin amacı CitySDK API kullanarak Istanbul için toplu taşıma bilgilerini çekmek ve bunu Yandex Haritaları ile birleştirerek son kullanıcı için faydalı bir uygulama haline getirmektir.
+Bu projenin amacı CitySDK API kullanarak Istanbul için toplu taşıma bilgilerini çekmek ve bunu Google Maps ile birleştirerek son kullanıcı için faydalı bir uygulama haline getirmektir.
 
 In English:
 
-This project aims to use City SDK API to gather public transportation information for the beautiful city of Istanbul and mash up this data with Yandex Maps to provide commuters with an helpful application.
+This project aims to use City SDK API to gather public transportation information for the beautiful city of Istanbul and mash up this data with Google Maps to provide commuters with an helpful application.
 
 Teşekkürler
 ===========
