@@ -148,7 +148,7 @@ function initialize() {
                 position: stop.location,
                 map: topluTasima.map,
                 title: stop.name,
-                icon: "/images/bus2.png",
+                icon: "images/bus2.png",
                 infoWindow: infoWindow,
                 stop: stop
             });
