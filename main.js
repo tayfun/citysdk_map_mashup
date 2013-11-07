@@ -8,7 +8,7 @@ var topluTasima = {
     "template": _.template($("#stop-template").html())
 };
 
-function initialize() {
+topluTasima.initialize = function() {
     "use strict";
 
     var mapcon = document.getElementById("mapcon");
@@ -179,8 +179,14 @@ function initialize() {
     function initMap() {
         $(".loading").remove();
         topluTasima.map = new google.maps.Map(mapcon, mapOptions);
+        // Show where we are.
+        new google.maps.Marker({
+            "position": mapOptions.center,
+            "map": topluTasima.map,
+            "title": "Buradasınız"
+        });
         getNearbyStops();
     }
-}
+};
 
-google.maps.event.addDomListener(window, 'load', initialize);
+google.maps.event.addDomListener(window, 'load', topluTasima.initialize);
