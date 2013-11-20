@@ -1,11 +1,17 @@
 // Our namespace.
 var topluTasima = {
     "baseUrl": "http://apicitysdk.ibb.gov.tr/",
+    // stops is the main data store we have. It has stops, lines and schedules
     "stops": {},
+    // lines is used as a set of lines whose schedules will be requested
     "lines": {},
+    // locationToMarker is used to find which marker is clicked
     "locationToMarker": {},
     "map": null,
-    "template": _.template($("#stop-template").html())
+    "template": _.template($("#stop-template").html()),
+    // lineKeyToStops is the data structure we use in indexing stops. It's a
+    // map with keys being search keywords and values are stop arrays.
+    "lineKeyToStops": {}
 };
 
 topluTasima.initialize = function() {
@@ -85,12 +91,14 @@ topluTasima.initialize = function() {
         })(1);
     }
 
-    function getLinesThrough(stop, page) {
-        var tLines = tStops[stop].lines;
-        return $.get(topluTasima.baseUrl + stop + "/select/ptlines", function(data) {
+    function getLinesThrough(stopCid, page) {
+        var tLines = tStops[stopCid].lines;
+        var stop = tStops[stopCid];
+        return $.get(topluTasima.baseUrl + stopCid + "/select/ptlines", function(data) {
             for (var i = 0; i < data.results.length; i++) {
                 var line = data.results[i];
                 var gtfs = line.layers.gtfs.data;
+                var lineKey = gtfs.route_short_name + " " + gtfs.route_long_name;
                 tLines[line.cdk_id] = {
                     "name": gtfs.route_short_name,
                     "long_name": gtfs.route_long_name,
@@ -99,9 +107,15 @@ topluTasima.initialize = function() {
                     "schedule": []
                 };
                 topluTasima.lines[line.cdk_id] = true;
+
+                if (topluTasima.lineKeyToStops[lineKey]) {
+                    topluTasima.lineKeyToStops[lineKey].push(stop);
+                } else {
+                    topluTasima.lineKeyToStops[lineKey] = [stop];
+                }
             }
             if (data.next_page && data.next_page > 1) {
-                getLinesThrough(stop, ++page);
+                getLinesThrough(stopCid, ++page);
             }
         }).fail(function() {
             console.log("fail at lines!");
@@ -157,12 +171,13 @@ topluTasima.initialize = function() {
             });
             google.maps.event.addListener(marker, "click", showInfoWindow);
         }
+        topluTasima.search();
     }
 
     function getLines() {
         var requests = [];
-        for (var stop in tStops) {
-            requests.push(getLinesThrough(stop, 0));
+        for (var stopCid in tStops) {
+            requests.push(getLinesThrough(stopCid, 0));
         }
         // After all lines are retrieved, get schedules.
         var defer = $.when.apply($, requests);
@@ -190,3 +205,29 @@ topluTasima.initialize = function() {
 };
 
 google.maps.event.addDomListener(window, 'load', topluTasima.initialize);
+
+topluTasima.searchEngine = new fullproof.ScoringEngine();
+
+topluTasima.search = function() {
+    var initializer = function(injector, callback) {
+        // This Object.keys trick is ES5 only.
+        var synchro = fullproof.make_synchro_point(callback, Object.keys(topluTasima.lineKeyToStops).length);
+        for (var lineKey in topluTasima.lineKeyToStops) {
+            injector.inject(lineKey, lineKey, synchro);
+        }
+    };
+    var index1 = {
+        name: "normalindex",
+        analyzer: new fullproof.ScoringAnalyzer(fullproof.normalizer.to_lowercase_nomark, fullproof.normalizer.remove_duplicate_letters),
+        capabilities: new fullproof.Capabilities().setUseScores(true).setDbName("toplutasimaDB").setComparatorObject(fullproof.ScoredEntry.comparatorObject).setDbSize(8*1024*1024),
+        initializer: initializer
+    };
+    var engineReady = function(isReady) {
+        if (isReady) {
+            console.log("Engine ready");
+        } else {
+            console.log("There's something wrong here");
+        }
+    };
+    topluTasima.searchEngine.open([index1], fullproof.make_callback(engineReady, true), fullproof.make_callback(engineReady, false));
+};
