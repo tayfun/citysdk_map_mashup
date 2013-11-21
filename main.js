@@ -194,6 +194,7 @@ topluTasima.initialize = function() {
     function initMap() {
         $(".loading").remove();
         topluTasima.map = new google.maps.Map(mapcon, mapOptions);
+        $(mapcon).append("<input type='text' id='search'>");
         // Show where we are.
         new google.maps.Marker({
             "position": mapOptions.center,
@@ -206,28 +207,15 @@ topluTasima.initialize = function() {
 
 google.maps.event.addDomListener(window, 'load', topluTasima.initialize);
 
-topluTasima.searchEngine = new fullproof.ScoringEngine();
+topluTasima.index = lunr(function () {
+    this.field('title');
+    this.ref('title');
+});
 
 topluTasima.search = function() {
-    var initializer = function(injector, callback) {
-        // This Object.keys trick is ES5 only.
-        var synchro = fullproof.make_synchro_point(callback, Object.keys(topluTasima.lineKeyToStops).length);
-        for (var lineKey in topluTasima.lineKeyToStops) {
-            injector.inject(lineKey, lineKey, synchro);
-        }
-    };
-    var index1 = {
-        name: "normalindex",
-        analyzer: new fullproof.ScoringAnalyzer(fullproof.normalizer.to_lowercase_nomark, fullproof.normalizer.remove_duplicate_letters),
-        capabilities: new fullproof.Capabilities().setUseScores(true).setDbName("toplutasimaDB").setComparatorObject(fullproof.ScoredEntry.comparatorObject).setDbSize(8*1024*1024),
-        initializer: initializer
-    };
-    var engineReady = function(isReady) {
-        if (isReady) {
-            console.log("Engine ready");
-        } else {
-            console.log("There's something wrong here");
-        }
-    };
-    topluTasima.searchEngine.open([index1], fullproof.make_callback(engineReady, true), fullproof.make_callback(engineReady, false));
+    for (var lineKey in topluTasima.lineKeyToStops) {
+        topluTasima.index.add({
+            "title": lineKey
+        });
+    }
 };
