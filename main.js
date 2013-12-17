@@ -12,6 +12,9 @@ var topluTasima = {
     // lineKeyToStops is the data structure we use in indexing stops. It's a
     // map with keys being search keywords and values are stop arrays.
     "lineKeyToStops": {},
+    // is map data loaded already?
+    "dataReady": false,
+    "controlcon": $("#controlcon"),
     "index": null
 };
 
@@ -206,6 +209,8 @@ topluTasima.initialize = function() {
             google.maps.event.addListener(marker, "click", showInfoWindow);
         }
         initIndex();
+        // Like an event emitter; set dataReady flag.
+        topluTasima.dataReady = true;
     }
 
     function getLines() {
@@ -228,7 +233,19 @@ topluTasima.initialize = function() {
     function initMap() {
         $(".loading").remove();
         topluTasima.map = new google.maps.Map(mapcon, mapOptions);
-        $(mapcon).append("<input type='text' id='search'>");
+        // Show search button.
+        topluTasima.map.controls[google.maps.ControlPosition.TOP_LEFT].push(
+                topluTasima.controlcon.show()[0]
+        );
+        // initialize auto-complete
+        topluTasima.controlcon.find("#search").autocomplete({
+            "minLength": 0,
+            "source": function(request, response) {
+                var results = topluTasima.index.search(request.term);
+                response(
+                    results.map(function(result) { return result.ref;}).sort());
+            }
+        });
         // Show where we are.
         new google.maps.Marker({
             "position": mapOptions.center,

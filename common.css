@@ -7,3 +7,23 @@ html, body {
 #mapcon {
     height: 100%;
 }
+
+#controlcon {
+    margin: 3em 0 0 1em;
+}
+
+#search {
+    border: 3px solid #10A0FF;
+    width: 20em;
+    padding: 0.25em;
+    font-size: 1.75em;
+}
+
+li.ui-menu-item {
+    border-bottom: 1px solid #10A0FF;
+    padding: 0.1em !important;
+}
+
+li.ui-menu-item:last-child {
+    border: none;
+}
