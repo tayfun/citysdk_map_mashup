@@ -7,15 +7,18 @@ var topluTasima = {
     "lines": {},
     // locationToMarker is used to find which marker is clicked
     "locationToMarker": {},
+    // one and only, our map.
     "map": null,
-    "template": _.template($("#stop-template").html()),
     // lineKeyToStops is the data structure we use in indexing stops. It's a
     // map with keys being search keywords and values are stop arrays.
     "lineKeyToStops": {},
     // is map data loaded already?
     "dataReady": false,
+    // container for map controllers
     "controlcon": $("#controlcon"),
-    "index": null
+    // Search index utilizing lunr
+    "index": null,
+    "lineKeyToLineData": {}
 };
 
 // lunr index for searching bus lines.
@@ -27,9 +30,11 @@ topluTasima.index = lunr(function () {
 topluTasima.initialize = function() {
     "use strict";
 
-    var mapcon = document.getElementById("mapcon");
-    var tStops = topluTasima.stops;
-    var tLines;
+    var mapcon = document.getElementById("mapcon"),
+        tStops = topluTasima.stops,
+        stopTemplate = _.template($("#stop-template").html()),
+        stopInfoTemplate = _.template($("#stop-info").html()),
+        tLines;
     $(".loading").show();
     google.maps.visualRefresh = true;
     topluTasima.$mapcon = $(mapcon);
@@ -118,10 +123,17 @@ topluTasima.initialize = function() {
                 };
                 topluTasima.lines[line.cdk_id] = true;
 
+                // This part is really complicated but it makes it easier to group
+                // stops with the same name that are across the street.
                 if (topluTasima.lineKeyToStops[lineKey]) {
-                    topluTasima.lineKeyToStops[lineKey].push(stop);
+                    if (topluTasima.lineKeyToStops[lineKey][stop.name]) {
+                        topluTasima.lineKeyToStops[lineKey][stop.name].push(stop);
+                    } else {
+                        topluTasima.lineKeyToStops[lineKey][stop.name] = [stop];
+                    }
                 } else {
-                    topluTasima.lineKeyToStops[lineKey] = [stop];
+                    topluTasima.lineKeyToStops[lineKey] = {};
+                    topluTasima.lineKeyToStops[lineKey][stop.name] = [stop];
                 }
             }
             if (data.next_page && data.next_page > 1) {
@@ -158,7 +170,7 @@ topluTasima.initialize = function() {
             topluTasima.infoWindow.close();
             delete topluTasima.infoWindow;
         }
-        var content = topluTasima.template({"stop": marker.stop});
+        var content = stopTemplate({"stop": marker.stop});
         topluTasima.infoWindow = new google.maps.InfoWindow({
             content: content
         });
@@ -239,11 +251,15 @@ topluTasima.initialize = function() {
         );
         // initialize auto-complete
         topluTasima.controlcon.find("#search").autocomplete({
-            "minLength": 0,
-            "source": function(request, response) {
+            minLength: 0,
+            source: function(request, response) {
                 var results = topluTasima.index.search(request.term);
                 response(
                     results.map(function(result) { return result.ref;}).sort());
+            },
+            select: function(event, ui) {
+                var content = stopInfoTemplate({stops: topluTasima.lineKeyToStops[ui.item.value]});
+                $("#stops").html(content).show();
             }
         });
         // Show where we are.
