@@ -11,8 +11,15 @@ var topluTasima = {
     "template": _.template($("#stop-template").html()),
     // lineKeyToStops is the data structure we use in indexing stops. It's a
     // map with keys being search keywords and values are stop arrays.
-    "lineKeyToStops": {}
+    "lineKeyToStops": {},
+    "index": null
 };
+
+// lunr index for searching bus lines.
+topluTasima.index = lunr(function () {
+    this.field('title');
+    this.ref('title');
+});
 
 topluTasima.initialize = function() {
     "use strict";
@@ -155,6 +162,33 @@ topluTasima.initialize = function() {
         topluTasima.infoWindow.open(topluTasima.map, marker);
     }
 
+    // Override tokenizer for a better one.
+    lunr.tokenizer = function(str) {
+        // Note that .trim is not available in IE < 9
+        str = str.trim();
+        // This makes sure we split according to dash characters as well
+        // so that CEBECI-TAKSIM is tokenized into ["CEBECI", "TAKSIM"]
+        return str.split(/\s*-\s*|\s+/);
+    };
+
+    var initIndex = function() {
+        // Create index
+        topluTasima.index = new lunr.Index();
+        topluTasima.index.field("title");
+        topluTasima.index.ref("title");
+        // Add fullproof's pipeline function to process tokens.
+        topluTasima.index.pipeline.add(function(token, tokenIndex, tokens) {
+            return fullproof.normalizer.to_lowercase_nomark(token);
+        });
+
+        // Add stop data to index
+        for (var lineKey in topluTasima.lineKeyToStops) {
+            topluTasima.index.add({
+                "title": lineKey
+            });
+        }
+    };
+
     function renderMap() {
         for (var stopCid in tStops) {
             var stop = tStops[stopCid];
@@ -171,7 +205,7 @@ topluTasima.initialize = function() {
             });
             google.maps.event.addListener(marker, "click", showInfoWindow);
         }
-        topluTasima.search();
+        initIndex();
     }
 
     function getLines() {
@@ -207,15 +241,3 @@ topluTasima.initialize = function() {
 
 google.maps.event.addDomListener(window, 'load', topluTasima.initialize);
 
-topluTasima.index = lunr(function () {
-    this.field('title');
-    this.ref('title');
-});
-
-topluTasima.search = function() {
-    for (var lineKey in topluTasima.lineKeyToStops) {
-        topluTasima.index.add({
-            "title": lineKey
-        });
-    }
-};
