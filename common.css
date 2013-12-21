@@ -9,14 +9,13 @@ html, body {
 }
 
 #controlcon {
-    margin: 3em 0 0 1em;
+    margin: 1em 0 0 0;
 }
 
 #search {
     border: 3px solid #10A0FF;
-    width: 20em;
     padding: 0.25em;
-    font-size: 1.75em;
+    width: 100%;
 }
 
 li.ui-menu-item {
@@ -26,4 +25,23 @@ li.ui-menu-item {
 
 li.ui-menu-item:last-child {
     border: none;
+}
+
+.row div {
+    padding: 0.25em;
+    background-color: #e1edff;
+    font-size: 1.5em;
+}
+
+.row span {
+    font-size: 1.5em;
+}
+
+.row .glyphicon {
+    font-family: 'Glyphicons Halflings';
+}
+
+#stops select {
+    width: 100%;
+    padding: 0.25em;
 }

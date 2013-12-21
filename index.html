@@ -16,14 +16,18 @@
     <h2>1 dk. <br />Konum bilginizi almamıza izin verirseniz başlayabiliriz ;)</h2>
   </div>
 </div> <!-- /mapcon -->
-<div id="controlcon" style="display: none;">
+<div id="controlcon" style="display: none;" class="container">
   <div class="row">
-    <div class="col-xs-6 col-sm-4">
-      <input type="text" id="search" placeholder="Otobüs Numarası veya İsmi" autocomplete="off" />
+    <div class="col-md-6">
+      <input type="text" id="search" placeholder="Otobüs Numarası/İsmi" autocomplete="off" />
     </div>
   </div>
-  <div id="stops" style="display: none;" class="row">
+  <div class="row" style="display: none;">
+    <div id="stops" class="col-md-4">
 
+    </div>
+  </div>
+  <div id="timetable">
   </div>
 </div>
 <script type="text/template" id="stop-template">
@@ -33,13 +37,35 @@
 <% }); %>
 </script>
 <script type="text/template" id="stop-info">
-<p>En Yakın Duraklar</p>
 <select name="stop-name" id="stop-name">
 <% for (var stop in stops) { %>
   <option><%= stop %></option>
 <% } %>
 </select>
-<button type="button">This Direction or That Direction?</button>
+</script>
+<script type="text/template" id="timetable-template">
+<div class="row">
+  <div class="col-md-4">
+    <%= from %>
+    <button type="button" class="btn btn-info">
+      <span class="glyphicon glyphicon-transfer"></span>
+    </button>
+    <%= to %>
+  </div>
+</div>
+<div class="row">
+  <div class="col-md-4">
+    <% _.each(schedule, function(time) { %>
+      <% var ts = time.split(":"); %>
+      <% var busTime = new Date(now.getFullYear(), now.getMonth(), now.getDay(), ts[0], ts[1], ts[2])%>
+      <% if (busTime < now) { %>
+        <span class="old-bus"><%= ts[0] %>:<%= ts[1] %></span>
+      <% } else { %>
+        <span class="new-bus"><%= ts[0] %>:<%= ts[1] %></span>
+      <% } %>
+    <% }) %>
+  </div>
+</div>
 </script>
 <!-- Use protocol independent URLs at the end of body, except for google maps files because they use user's sensitive data such as location. -->
 <script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?v=3.exp&key=AIzaSyBgwQKdZWNqzl9slLNO437C3lXKy14eR-E&sensor=true&language=tr&region=TR"></script>

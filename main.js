@@ -18,7 +18,8 @@ var topluTasima = {
     "controlcon": $("#controlcon"),
     // Search index utilizing lunr
     "index": null,
-    "lineKeyToLineData": {}
+    "lineKeyToLineData": {},
+    "selectedLineKey": null
 };
 
 // lunr index for searching bus lines.
@@ -33,8 +34,9 @@ topluTasima.initialize = function() {
     var mapcon = document.getElementById("mapcon"),
         tStops = topluTasima.stops,
         stopTemplate = _.template($("#stop-template").html()),
+        timetableTemplate = _.template($("#timetable-template").html()),
         stopInfoTemplate = _.template($("#stop-info").html()),
-        tLines;
+        tLines, $timetable = $("#timetable");
     $(".loading").show();
     google.maps.visualRefresh = true;
     topluTasima.$mapcon = $(mapcon);
@@ -73,7 +75,7 @@ topluTasima.initialize = function() {
         // Gets nearby stops from citysdk api.
         var curPos = topluTasima.map.getCenter();
         var stopParameters = {
-            "radius": 400,  // Get data around 400m radius
+            "radius": 1000,  // Get data around 400m radius
             "lat": curPos.lat(),
             "lon": curPos.lng(),
             "geom": true,  // Get lat long values of POI as well.
@@ -110,12 +112,16 @@ topluTasima.initialize = function() {
         var tLines = tStops[stopCid].lines;
         var stop = tStops[stopCid];
         return $.get(topluTasima.baseUrl + stopCid + "/select/ptlines", function(data) {
+            if (data.results.length === 0) {
+                // If this stop has no bus lines, we don't wanna see it.
+                delete tStops[stopCid];
+            }
             for (var i = 0; i < data.results.length; i++) {
                 var line = data.results[i];
                 var gtfs = line.layers.gtfs.data;
                 var lineKey = gtfs.route_short_name + " " + gtfs.route_long_name;
                 tLines[line.cdk_id] = {
-                    "name": gtfs.route_short_name,
+                    "short_name": gtfs.route_short_name,
                     "long_name": gtfs.route_long_name,
                     "from": gtfs.route_from,
                     "to": gtfs.route_to,
@@ -242,6 +248,50 @@ topluTasima.initialize = function() {
         });
     }
 
+    function selectCallback(e) {
+        // This function is called when a stop is selected from select
+        // input. It displays the time table for the selected line and
+        // selected stop and direction.
+        // First and only argument e is either the event object when called
+        // as a event callback or 0 or 1 if the user wants to change the
+        // direction of the bus he wants to know more about.
+        var stop = $(e.target).val(), myStop = null, stopNumber = 0,
+            myLine = null;
+        var stops = topluTasima.lineKeyToStops[topluTasima.selectedLineKey][stop];
+        if (typeof e == "Number") {
+            if (stops.length > e) {
+                // If we can get info about the direction of the bus, do it.
+                // Else we'll get info about the first direction we have.
+                stopNumber = e;
+            }
+        }
+
+        myStop = stops[stopNumber];
+        for (var lineName in myStop.lines) {
+            var line = myStop.lines[lineName];
+            if (line.short_name + " " + line.long_name == topluTasima.selectedLineKey) {
+                myLine = line;
+                break;
+            }
+        }
+
+        if (myLine === null) {
+            // This should not happen. Maybe log it to crittercism or
+            // sentry etc.
+            console.log("There's an error as the line is not there");
+            return;
+        }
+
+        var content = timetableTemplate({
+            schedule: myLine.schedule,
+            from: myLine.from,
+            to: myLine.to,
+            stopNumber: stopNumber,
+            now: new Date()
+        });
+        $timetable.html(content);
+    }
+
     function initMap() {
         $(".loading").remove();
         topluTasima.map = new google.maps.Map(mapcon, mapOptions);
@@ -258,8 +308,18 @@ topluTasima.initialize = function() {
                     results.map(function(result) { return result.ref;}).sort());
             },
             select: function(event, ui) {
-                var content = stopInfoTemplate({stops: topluTasima.lineKeyToStops[ui.item.value]});
-                $("#stops").html(content).show();
+                topluTasima.selectedLineKey = ui.item.value;
+                var content = stopInfoTemplate(
+                    {
+                        stops: topluTasima.lineKeyToStops[ui.item.value]
+                    }
+                );
+                $("#stops").html(content).parent().show();
+                $("#stops select").focus();
+                $("#stops select").change(selectCallback);
+                // Trigger change element so that the default timetable
+                // for the stop is shown at the beginning.
+                $("#stops select").change();
             }
         });
         // Show where we are.
