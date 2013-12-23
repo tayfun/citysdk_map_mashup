@@ -6,8 +6,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
   <title>Istanbul Toplu Taşıma - Nasıl Giderim?</title>
   <link href="common.css" rel="stylesheet">
-  <link href="//code.jquery.com/ui/1.10.3/themes/smoothness/jquery-ui.css" rel="stylesheet">
-  <link href="//netdna.bootstrapcdn.com/bootstrap/3.0.3/css/bootstrap.min.css" rel="stylesheet">
+  <link href="http://code.jquery.com/ui/1.10.3/themes/smoothness/jquery-ui.css" rel="stylesheet">
+  <link href="http://netdna.bootstrapcdn.com/bootstrap/3.0.3/css/bootstrap.min.css" rel="stylesheet">
 </head>
 <body>
 <div id="mapcon">
@@ -45,7 +45,7 @@
 </script>
 <script type="text/template" id="timetable-template">
 <div class="row">
-  <div class="col-md-4">
+  <div class="col-md-4" style="text-align:center;">
     <%= from %>
     <button type="button" class="btn btn-info">
       <span class="glyphicon glyphicon-transfer"></span>
@@ -54,16 +54,20 @@
   </div>
 </div>
 <div class="row">
-  <div class="col-md-4">
-    <% _.each(schedule, function(time) { %>
-      <% var ts = time.split(":"); %>
-      <% var busTime = new Date(now.getFullYear(), now.getMonth(), now.getDay(), ts[0], ts[1], ts[2])%>
-      <% if (busTime < now) { %>
-        <span class="old-bus"><%= ts[0] %>:<%= ts[1] %></span>
-      <% } else { %>
-        <span class="new-bus"><%= ts[0] %>:<%= ts[1] %></span>
-      <% } %>
-    <% }) %>
+  <div class="col-md-4" style="overflow: hidden;">
+    <div id="timetable-carousel">
+      <div id="timetable-items">
+      <% _.each(schedule, function(time, index) { %>
+        <% var ts = time.split(":"); %>
+        <% var busTime = new Date(now.getFullYear(), now.getMonth(), now.getDate(), ts[0], ts[1], ts[2])%>
+        <% if (busTime < now) { %>
+          <span class="old-bus"><%= ts[0] %>:<%= ts[1] %></span>
+        <% } else { %>
+          <span class="new-bus"><%= ts[0] %>:<%= ts[1] %></span>
+        <% } %>
+      <% }) %>
+      </div>
+    </div>
   </div>
 </div>
 </script>

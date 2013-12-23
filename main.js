@@ -75,7 +75,7 @@ topluTasima.initialize = function() {
         // Gets nearby stops from citysdk api.
         var curPos = topluTasima.map.getCenter();
         var stopParameters = {
-            "radius": 1000,  // Get data around 400m radius
+            "radius": 400,  // Get data around 400m radius
             "lat": curPos.lat(),
             "lon": curPos.lng(),
             "geom": true,  // Get lat long values of POI as well.

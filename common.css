@@ -27,7 +27,7 @@ li.ui-menu-item:last-child {
     border: none;
 }
 
-.row div {
+.row > div {
     padding: 0.25em;
     background-color: #e1edff;
     font-size: 1.5em;
@@ -44,4 +44,47 @@ li.ui-menu-item:last-child {
 #stops select {
     width: 100%;
     padding: 0.25em;
+}
+
+.carousel-control glyphicon-chevron-left {
+    left: 0 !important;
+}
+
+.carousel-control glyphicon-chevron-right {
+    right: 0 !important;
+}
+
+.carousel-control {
+    color: black;
+    background-image: none;
+}
+
+#timetable button {
+    margin: 0 1em;
+}
+
+#timetable-carousel {
+    overflow: hidden;
+    margin-bottom: 1em;
+}
+
+#timetable-carousel:before {
+    font-family: 'Glyphicons Halflings';
+    content: "\e079";
+    display: inline;
+}
+
+#timetable-carousel:after {
+    font-family: 'Glyphicons Halflings';
+    content: "\e080";
+    display: inline;
+}
+
+#timetable-items {
+    width: 10000px;
+    display: inline-block;
+}
+
+#timetable-items span {
+    margin-right: 1em;
 }
