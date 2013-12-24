@@ -30,11 +30,7 @@ li.ui-menu-item:last-child {
 .row > div {
     padding: 0.25em;
     background-color: #e1edff;
-    font-size: 1.5em;
-}
-
-.row span {
-    font-size: 1.5em;
+    font-size: 1.25em;
 }
 
 .row .glyphicon {
@@ -61,23 +57,12 @@ li.ui-menu-item:last-child {
 
 #timetable button {
     margin: 0 1em;
+    font-size: 8px;
 }
 
 #timetable-carousel {
-    overflow: hidden;
     margin-bottom: 1em;
-}
-
-#timetable-carousel:before {
-    font-family: 'Glyphicons Halflings';
-    content: "\e079";
-    display: inline;
-}
-
-#timetable-carousel:after {
-    font-family: 'Glyphicons Halflings';
-    content: "\e080";
-    display: inline;
+    overflow: hidden;
 }
 
 #timetable-items {
@@ -87,4 +72,8 @@ li.ui-menu-item:last-child {
 
 #timetable-items span {
     margin-right: 1em;
+}
+
+#timetable-inner-row {
+    margin: 0;
 }
