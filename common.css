@@ -61,19 +61,30 @@ li.ui-menu-item:last-child {
 }
 
 #timetable-carousel {
-    margin-bottom: 1em;
     overflow: hidden;
 }
 
 #timetable-items {
     width: 10000px;
     display: inline-block;
+    position: relative;
 }
 
 #timetable-items span {
     margin-right: 1em;
+    font-size: 1.25em;
 }
 
 #timetable-inner-row {
     margin: 0;
+}
+
+.active.new-bus {
+    background-color: yellow;
+    padding: 1.5em;
+    font-size: 1.25em;
+}
+
+.container {
+    width: 600px;
 }

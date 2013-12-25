@@ -290,6 +290,12 @@ topluTasima.initialize = function() {
             now: new Date()
         });
         $timetable.html(content);
+        // Animate to the next bus
+        var next_bus = $("#timetable-items .new-bus:first");
+        if (next_bus) {
+            $("#timetable-items").animate({right: next_bus.position().left});
+            next_bus.addClass("active");
+        }
     }
 
     function initMap() {
