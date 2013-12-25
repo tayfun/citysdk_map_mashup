@@ -255,10 +255,10 @@ topluTasima.initialize = function() {
         // First and only argument e is either the event object when called
         // as a event callback or 0 or 1 if the user wants to change the
         // direction of the bus he wants to know more about.
-        var stop = $(e.target).val(), myStop = null, stopNumber = 0,
+        var stop = $("#stop-name").val(), myStop = null, stopNumber = 0,
             myLine = null;
         var stops = topluTasima.lineKeyToStops[topluTasima.selectedLineKey][stop];
-        if (typeof e == "Number") {
+        if ((typeof e).toLowerCase() == "number") {
             if (stops.length > e) {
                 // If we can get info about the direction of the bus, do it.
                 // Else we'll get info about the first direction we have.
@@ -286,16 +286,30 @@ topluTasima.initialize = function() {
             schedule: myLine.schedule,
             from: myLine.from,
             to: myLine.to,
-            stopNumber: stopNumber,
             now: new Date()
         });
         $timetable.html(content);
         // Animate to the next bus
         var next_bus = $("#timetable-items .new-bus:first");
+        var last_bus = $("#timetable-items span:last-child");
+        var items = $("#timetable-items");
         if (next_bus) {
-            $("#timetable-items").animate({right: next_bus.position().left});
+            items.animate({right: next_bus.position().left});
             next_bus.addClass("active");
         }
+        $("#timetable-control-left").on("click", function(){
+            if (items.position().left < 0) {
+                items.animate({right: "-=10em"});
+            }
+        });
+        $("#timetable-control-right").on("click", function(){
+            if (-last_bus.position().left < items.position().left) {
+                items.animate({right: "+=10em"});
+            }
+        });
+        $("#direction").on("click", function(){
+            selectCallback(++stopNumber);
+        });
     }
 
     function initMap() {

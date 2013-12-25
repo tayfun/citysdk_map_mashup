@@ -47,7 +47,7 @@
 <div class="row">
   <div class="col-xs-6" style="text-align:center;">
     <%= from %>
-    <button type="button" class="btn btn-info">
+    <button type="button" id="direction" class="btn btn-info">
       <span class="glyphicon glyphicon-transfer"></span>
     </button>
     <%= to %>
@@ -56,11 +56,12 @@
 <div class="row">
   <div class="col-xs-6" style="overflow: hidden;">
     <div id="timetable-inner-row" class="row">
-      <div class="col-xs-1">
+      <div id="timetable-control-left" class="col-xs-1">
         <span id="timetable-left" class="glyphicon glyphicon-chevron-left timetable-control"></span>
       </div>
       <div id="timetable-carousel" class="col-xs-10">
         <div id="timetable-items">
+          <span>ilk otobüs</span>
         <% _.each(schedule, function(time, index) { %>
           <% var ts = time.split(":"); %>
           <% var busTime = new Date(now.getFullYear(), now.getMonth(), now.getDate(), ts[0], ts[1], ts[2])%>
@@ -70,9 +71,10 @@
             <span class="new-bus"><%= ts[0] %>:<%= ts[1] %></span>
           <% } %>
         <% }) %>
+          <span>son otobüs</span>
         </div>
       </div>
-      <div class="col-xs-1">
+      <div id="timetable-control-right" class="col-xs-1">
         <span id="timetable-right" class="glyphicon glyphicon-chevron-right timetable-control"></span>
       </div>
     </div>

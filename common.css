@@ -42,19 +42,6 @@ li.ui-menu-item:last-child {
     padding: 0.25em;
 }
 
-.carousel-control glyphicon-chevron-left {
-    left: 0 !important;
-}
-
-.carousel-control glyphicon-chevron-right {
-    right: 0 !important;
-}
-
-.carousel-control {
-    color: black;
-    background-image: none;
-}
-
 #timetable button {
     margin: 0 1em;
     font-size: 8px;
